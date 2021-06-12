@@ -1,0 +1,45 @@
+#!/bin/sh
+# shellcheck disable=SC2015
+# This imp has support for multiple files, heredocs, stdin, and ofc single files
+print() {
+  while read -r p; do
+    IFS=""; echo "$p"
+  done <&0
+}
+usage() {
+  ${0} << EOF
+(sh)cat: Pure SH cat replacement...
+Usage:
+  $0 [file|stdin]
+Supports:
+  - concatenating files ( $0 <file> <file2> <file3> )
+  - stdin ( < file )
+  - heredocs ( << EOF )
+  - basic files ( $0 <file> )
+EOF
+}
+acase() {
+  case "$#" in
+    0)
+      print;;
+    1)
+      print < "$1";;
+    *)
+      for i in "$@"; do
+        print < "$i"
+      done
+    ;;
+  esac
+}
+arg(){
+while [ "$1" ]; do
+  case "$1" in
+    --help|-h)
+      usage; exit 0;;
+    *)
+      acase "$@";;
+  esac
+  shift 1
+done
+}
+[ "$1" ] && { arg "$@"; } || { acase "$@"; }
