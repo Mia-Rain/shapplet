@@ -1,0 +1,21 @@
+#!/bin/sh
+run(){
+  [ -f "$1" ] && {
+    con="$(while read -r p; do
+      IFS=""; echo "$p"
+    done < "$1")"
+    # this uses a makeshift pure sh cat
+    IFS=""; echo "$con" > "$1"
+  } || { echo > "$1"; }
+}
+case "$#" in
+  0)
+    exit 1;;
+  1)
+    run "$1";;
+  *)
+    for i in "$@"; do
+      run "$i"
+    done
+  ;;
+esac
