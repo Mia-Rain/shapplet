@@ -11,8 +11,6 @@ run(){
 case "$#" in
   0)
     exit 1;;
-  1)
-    run "$1";;
   *)
     for i in "$@"; do
       run "$i"

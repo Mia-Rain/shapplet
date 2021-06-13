@@ -1,0 +1,8 @@
+-----------------------------
+# SHapplet: Pure POSIX SH coreutils applet replacements
+-----------------------------
+# minimum size applets can be found in ./bin/
+# applets with additions for ease of use can be found ./ex/
+-----------------------------
+# applets have been tested with `time` and are the exact same speed as coreutil's applets (0.000s run time)
+-----------------------------

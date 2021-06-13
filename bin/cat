@@ -1,0 +1,16 @@
+#!/bin/sh
+print() {
+  out="$(while read -r p; do
+    IFS=""; echo "$p"
+  done <&0)"
+  IFS=""; echo "$out"
+}
+case "$#" in
+  0)
+    print;;
+  *)
+    for i in "$@"; do
+      print < "$i"
+    done
+  ;;
+esac
