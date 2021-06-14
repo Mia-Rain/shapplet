@@ -1,0 +1,18 @@
+#!/bin/sh
+loop(){
+  out=$(for i in ${1}; do
+    IFS=""; printf "$i "
+  done)
+  echo "$out"
+}
+case "$#" in
+  0)
+    loop "./.* ./*";;
+  *)
+    for i in "$@"; do
+      [ -d "$i" -o -f "$i" ] && {
+        [ -f "$i" ] && { loop "$i"; } || { loop "$i/.* $i/*"; }
+      } || { echo "$i could not be found.."; exit 1; }
+    done
+  ;;
+esac
