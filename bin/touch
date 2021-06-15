@@ -1,6 +1,6 @@
 #!/bin/sh
 run(){
-  [ -f "$1" ] && {
+  [ -e "$1" ] && {
     con="$(while read -r p; do
       IFS=""; echo "$p"
     done < "$1")"

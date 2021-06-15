@@ -10,7 +10,7 @@ case "$#" in
     print;;
   *)
     for i in "$@"; do
-      print < "$i"
+      [ -e "$i" ] && { print < "$i"; } || { echo "$i is missing or not a file..."; }
     done
   ;;
 esac

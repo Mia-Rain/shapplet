@@ -10,8 +10,8 @@ case "$#" in
     loop "./.* ./*";;
   *)
     for i in "$@"; do
-      [ -d "$i" -o -f "$i" ] && {
-        [ -f "$i" ] && { loop "$i"; } || { loop "$i/.* $i/*"; }
+      [ -e "$i" ] && {
+        [ -f "$i" ] && { loop "$i"; } || { [ -d "$i" ] && { loop "$i/.* $i/*"; }; }
       } || { echo "$i could not be found.."; exit 1; }
     done
   ;;
