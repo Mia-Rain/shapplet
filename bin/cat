@@ -1,17 +1,20 @@
 #!/bin/sh
-LANG=C # required to read binary files
 print() {
   out="$(while read -r p; do
     IFS=""; echo "$p"
   done <&0)"
-  IFS=""; echo "$out"
+  IFS=""
 }
 case "$#" in
   0)
-    print;;
+    print; [ -n "$out" ] || { LANG=C; print; }
+    echo "$out"
+    ;;
   *)
     for i in "$@"; do
       [ -e "$i" ] && { print < "$i"; } || { echo "$i is missing or not a file..."; }
+      [ -n "$out" ] || { LANG=C; print < "$i"; }
+      echo "$out"
     done
   ;;
 esac
