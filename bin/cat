@@ -1,20 +1,24 @@
 #!/bin/sh
+LANG=C
 print() {
-  out="$(while read -r p; do
-    IFS=""; echo "$p"
-  done <&0)"
-  IFS=""
+  [ ! -t "1" ] && {
+    out="$(while read -r p; do
+      IFS=""; echo "$p"
+    done <&0)"
+    IFS=""; echo "$out"; true
+  } || { 
+    while read -r p; do
+      IFS=""; echo "$p"
+    done <&0
+  }
+  # extra long but reponds faster when stdout is terminal
 }
 case "$#" in
   0)
-    print; [ -n "$out" ] || { LANG=C; print; }
-    echo "$out"
-    ;;
+    print;;
   *)
     for i in "$@"; do
       [ -e "$i" ] && { print < "$i"; } || { echo "$i is missing or not a file..."; }
-      [ -n "$out" ] || { LANG=C; print < "$i"; }
-      echo "$out"
     done
   ;;
 esac

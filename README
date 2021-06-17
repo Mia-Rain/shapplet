@@ -4,5 +4,8 @@
 # minimum size applets can be found in ./bin/
 # applets with additions for ease of use can be found ./ex/
 -----------------------------
-# applets have been tested with `time` and are the exact same speed as coreutil's applets (0.000s run time)
+# applets have been tested with `time`
+  - touch: same as coreutils
+  - ls: same as coreutils
+  - cat: slower when reading from binaries, same otherwise
 -----------------------------
