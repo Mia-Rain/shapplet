@@ -1,4 +1,5 @@
 #!/bin/sh
+LANG=C # required to read binary files
 print() {
   out="$(while read -r p; do
     IFS=""; echo "$p"
