@@ -1,9 +1,9 @@
 #!/bin/sh
 loop(){
-  out=$(for i in ${1}; do
-    IFS=""; printf "$i "
-  done)
-  echo "$out"
+  echo "$(for i in $1; do
+    IFS=
+    printf "%s\\n" $i
+  done)"
 }
 case "$#" in
   0)
@@ -11,7 +11,7 @@ case "$#" in
   *)
     for i in "$@"; do
       [ -e "$i" ] && {
-        [ -f "$i" ] && { loop "$i"; } || { [ -d "$i" ] && { loop "$i/.* $i/*"; }; }
+        [ -f "$i" ] && { loop "$i"; } || { [ -d "$i" ] && { n="1"; loop "${i%/}/.* ${i%/}/*"; }; }
       } || { echo "$i could not be found.."; exit 1; }
     done
   ;;
