@@ -1,24 +1,30 @@
 #!/bin/sh
 LANG=C
-print() {
-  [ ! -t "1" ] && {
-    out="$(while read -r p; do
-      IFS=""; echo "$p"
-    done <&0)"
-    IFS=""; echo "$out"; true
-  } || { 
-    while read -r p; do
-      IFS=""; echo "$p"
-    done <&0
-  }
-  # extra long but reponds faster when stdout is terminal
+print() { 
+  printf "%s\\n" "$(while read -r p; do
+    IFS=""; printf "%s\\n" "$p"
+
+    # there is an unfixable bug here;
+
+    # read will fail if the line does not have a newline term5
+    # this will stop the loop before the data is read
+    # preventing it from being outputed
+    # this is exetremely unlikely to happen
+    # unless reading, from a STDIN without EOF
+    # or xclip
+
+  done <&0)"
 }
 case "$#" in
   0)
     print;;
   *)
     for i in "$@"; do
-      [ -e "$i" ] && { print < "$i"; } || { echo "$i is missing or not a file..."; }
+      if [ -e "$i" ]; then
+        print < "$i"
+      else
+        echo "$i is not a file or missing"; exit 1
+      fi # if is better here since print() could fail for some reason
     done
   ;;
 esac
