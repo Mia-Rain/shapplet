@@ -1,7 +1,7 @@
 #!/bin/sh
 run(){
   [ -e "$1" ] && {
-    con="$(while read -r p; do
+    con="$(while read -r p || [ -n "$p" ]; do 
       IFS=""; echo "$p"
     done < "$1")"
     # this uses a makeshift pure sh cat
