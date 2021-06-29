@@ -1,10 +1,11 @@
 #!/bin/sh
 LANG=C
 print() { 
-  printf "%s\\n" "$(while read -r p; do
+  printf "%s\\n" "$(while read -r p || [ -n "$p" ] ; do
     IFS=""; printf "%s\\n" "$p"
 
-    # there is an unfixable bug here;
+    # no newline term bug
+    # see https://stackoverflow.com/a/12916758
 
     # read will fail if the line does not have a newline term5
     # this will stop the loop before the data is read
