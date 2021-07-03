@@ -6,21 +6,21 @@ rcase() {
   while read -r p || [ -n "$p" ] ; do
     case "$p" in
       *${1}*)
-        [ "$2" != "-q" ] && { printf "%s\\n" "$p"; } || { exit 0; }
+        [ "$2" != "-q" ] && { IFS=""; printf "%s\\n" "$p"; } || { exit 0; }
       ;;
     esac    
   done <&0
   exit 1
 }
 case "$#" in
-  0) exit 1;;
-  1) rcase "$1";;
-  2)
-    [ -e "$2" ] && { rcase "$1" < "$2"; } || { 
-      rcase "$1" "-q"
-    };;
   3)
     [ -e "$2" -a "$3" = "-q" ] && { rcase "$1" "-q" < "$2"; } || {
       exit 1
-    };;
+    }
+  ;;
+  *)
+    [ -e "$2" ] && { rcase "$1" < "$2"; } || {
+      rcase "${1:?grep requires an argument}" "${2:+-q}" || exit 1
+    }
+  ;;
 esac
