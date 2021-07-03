@@ -1,14 +1,15 @@
 #!/bin/sh
+# shellcheck disable=SC2015
 LANG=C
 print() { 
   printf "%s\\n" "$(while read -r p || [ -n "$p" ] ; do
     IFS=""; printf "%s\\n" "$p"
 
-    # no newline term bug
+    # no newline term bug fix
     # see https://stackoverflow.com/a/12916758
 
-    # read will fail if the line does not have a newline term5
-    # this will stop the loop before the data is read
+    # read will set the value of rh variable but exit non-zero
+    # ending the loop
     # preventing it from being outputed
     # this is exetremely unlikely to happen
     # unless reading, from a STDIN without EOF
@@ -21,11 +22,11 @@ case "$#" in
     print;;
   *)
     for i in "$@"; do
-      if [ -e "$i" ]; then
+      [ -e "$i" ] && {
         print < "$i"
-      else
+      } || {
         echo "$i is not a file or missing"; exit 1
-      fi # if is better here since print() could fail for some reason
+      } # print() should never exit non zero unless something outside the script is broken
     done
   ;;
 esac
