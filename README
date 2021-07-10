@@ -9,6 +9,7 @@
   - cat: slower when reading from binaries, same otherwise
   - grep: same as coreutils
   - seq: same as coreutils
+  - tr: same as coreutils
 ----------------------------
 # shellcheck should show no issues; `&&` and `||` are used over if for smaller code base
 -----------------------------

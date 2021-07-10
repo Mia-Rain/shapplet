@@ -5,7 +5,7 @@ LANG=C # incase someone tries to use grep on a binary
 rcase() {
   while read -r p || [ -n "$p" ] ; do
     case "$p" in
-      *${1}*)
+      *"${1}"*)
         [ "$2" != "-q" ] && { IFS=""; printf "%s\\n" "$p"; } || { exit 0; }
       ;;
     esac    
