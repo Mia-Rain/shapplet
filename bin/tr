@@ -1,13 +1,21 @@
 #!/bin/sh
 # shellcheck disable=SC2015,SC2059,SC2048
-IFS=""; c=$(while read -r p || [ -n "$p" ]; do
-  printf "%s\\n" "$p"
-done <&0) # set contents of stdin to a string to allow for \n replacement
-r="$1"; d="$2";[ ! "${r##\\*}" ] && {
-  # the following is intended
-  set -f; IFS=$(printf "\\$r"); set +f; true
-} || { IFS="${r}"; } # handle escapes
-set -- "$c" # turn contents of stdin into arg list
-for i in $*; do # $* is intended
-  [ ! "$e" ] && { e="$i";:; } || { e="$e$d$i";:; }
-done; printf "%s\\n" "$e"
+export r="$1" d="$2"
+while read -r p || [ -n "$p" ]; do
+  [ ! "${r##\\*}" ] && {
+  eval << EOF
+IFS=$\'${r}\'
+EOF
+  # an odd bug happens here
+  # where \n matches \t and vice versa
+  :;} || { IFS="${r}"; } # handle escapes
+  set -- "$p" # turn contents of stdin into arg list
+  for i in $*; do # $* is intended
+    [ ! "$e" ] && { e="$i";:; } || { e="$e$d$i";:; }
+  done
+done; printf '%s' "$e"
+# There is a bug here; the cause of which I do not know of
+# trailing escapes seem to be trimmed
+# ie:
+# '1\t2\t' becomes '1\t2'
+# this happens in the old and new version of this script
