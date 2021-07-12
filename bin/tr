@@ -1,21 +1,43 @@
 #!/bin/sh
 # shellcheck disable=SC2015,SC2059,SC2048
-export r="$1" d="$2"
-while read -r p || [ -n "$p" ]; do
-  [ ! "${r##\\*}" ] && {
-  eval << EOF
-IFS=$\'${r}\'
+c=$(while IFS=""; read -r p || [ -n "$p" ]; do
+  printf '%s\n' "$p"
+done <&0) # allow trailing escapes check
+r="$1"; d="$2"; [ ! "${r##\\*}" ] && {
+  unset IFS; eval << EOF
+IFS=$\'${r}'
 EOF
-  # an odd bug happens here
-  # where \n matches \t and vice versa
-  :;} || { IFS="${r}"; } # handle escapes
-  set -- "$p" # turn contents of stdin into arg list
-  for i in $*; do # $* is intended
-    [ ! "$e" ] && { e="$i";:; } || { e="$e$d$i";:; }
-  done
-done; printf '%s' "$e"
-# There is a bug here; the cause of which I do not know of
+;:} || { IFS="${r}"; } # handle escapes
+set -- "$c" # turn contents of stdin into arg list
+for i in $*; do # $* is intended
+  [ ! "$e" ] && { e="$i";:; } || { e="$e$d$i";:; }
+done
+
+# There was a bug here
 # trailing escapes seem to be trimmed
 # ie:
 # '1\t2\t' becomes '1\t2'
-# this happens in the old and new version of this script
+# upon print OR read if IFS is not ""/NULL
+# when either of these take place
+#
+# the only fix I could find for this was to check if stdin ended with $IFS
+# and if it does check if $e does NOT end with $d
+# 
+# I've created a imp of this using case as follows
+# inorder for this to work I had to switch back to using $() over working line by line
+
+case "$c" in
+  *${IFS})
+    case "$e" in
+      *${d}) ;;
+      *) e="$e$d"
+    esac
+esac
+
+printf '%s\n' "$e"
+
+# "real" tr does not output a trailing newline
+# if no trailing newline was given, but do to $() removing trailing newlines
+# I am unable to make a case for this
+# without rerunning everything with $r as '\n'
+# I hope to fix this in the next commit
