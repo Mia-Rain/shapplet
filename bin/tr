@@ -7,7 +7,8 @@ r="$1"; d="$2"; [ ! "${r##\\*}" ] && {
   unset IFS; eval << EOF
 IFS=$\'${r}'
 EOF
-;:} || { IFS="${r}"; } # handle escapes
+:
+} || { IFS="${r}"; } # handle escapes
 set -- "$c" # turn contents of stdin into arg list
 for i in $*; do # $* is intended
   [ ! "$e" ] && { e="$i";:; } || { e="$e$d$i";:; }

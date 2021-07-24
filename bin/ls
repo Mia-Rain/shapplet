@@ -1,19 +1,31 @@
 #!/bin/sh
-# shellcheck disable=SC2015,SC2005
+# shellcheck disable=SC2059,SC2046,SC2015
 loop(){
-  echo "$(for i in $1; do # this echo is not useless; required for redirects to contain all data
-    IFS=
-    printf "%s\\n" "$i"
-  done)"
+  IFS=""
+  d="${A%*}"; # remove leading /'s
+  printf '%s\n' $(for i in ${1}; do i=${i##$d}; printf "$i  "; done)
 }
 case "$#" in
   0)
-    loop "./.* ./*";;
+    A="./"; loop "./*";;
   *)
-    for i in "$@"; do
-      [ -e "$i" ] && {
-        [ -f "$i" ] && { loop "$i"; } || { [ -d "$i" ] && { loop "${i%/}/.* ${i%/}/*"; }; }
-      } || { echo "$i could not be found.."; exit 1; }
+    set -- "$@"; i="$#" # backwards loop setup to match coreutils ls
+    # also allows checking if last arg
+    while [ "$i" -gt 0 ]; do
+      eval "A=\${$i}"
+      [ -e "$A" ] && {
+        [ -f "$A" ] && {
+          [ "$#" -gt 1 ] && { A="$A  "; }
+          printf '%s\n' "$A"
+          [ ! $i -eq 1 ] && { echo; }; :
+        } || {
+          [ "$#" -gt 1 ] && { printf '%s:\n' "$A"; loop "${A%/}/*"; } || {
+            loop "${A%/}/*"
+          }
+            [ ! $i -eq 1 ] && { echo; }
+        :;}
+      } || { echo "${0##*/}: cannot access '$1': No such file or directory"; exit 1; }
+    : $((i-=1))
     done
   ;;
 esac
