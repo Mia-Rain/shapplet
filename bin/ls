@@ -1,31 +1,53 @@
 #!/bin/sh
-# shellcheck disable=SC2059,SC2046,SC2015
+# shellcheck disable=SC2059,SC2046,SC2015,SC2086
 loop(){
   IFS=""
   d="${A%*}"; # remove leading /'s
-  printf '%s\n' $(for i in ${1}; do i=${i##$d}; printf "$i  "; done)
+  printf '%s' $(for i in ${1}; do i=${i##$d}; printf '%s' "$i  "; done)
 }
-case "$#" in
-  0)
-    A="./"; loop "./*";;
-  *)
-    set -- "$@"; i="$#" # backwards loop setup to match coreutils ls
-    # also allows checking if last arg
-    while [ "$i" -gt 0 ]; do
-      eval "A=\${$i}"
-      [ -e "$A" ] && {
-        [ -f "$A" ] && {
-          [ "$#" -gt 1 ] && { A="$A  "; }
-          printf '%s\n' "$A"
-          [ ! $i -eq 1 ] && { echo; }; :
+acase() {
+  case "$#" in
+    0)
+      A="./"; [ "$a" ] && { loop ".*";}; loop "*"; echo;;
+    *)
+      set -- "${@}"; i="$#" # backwards loop setup to match coreutils ls
+      # also allows checking if last arg
+      while [ "$i" -gt 0 ]; do
+        eval "A=\${$i}"
+        [ -e "${A}" ] && {
+          [ -f "$A" ] && {
+            [ "$#" -gt 1 ] && { A="$A  "; }
+            printf '%s\n' "$A"
+          } || {
+            [ "$#" -gt 1 ] && { printf '%s:\n' "$A"; [ "$a" ] && { loop "${A%/}/.*";}; loop "${A%/}/*"; } || {
+              [ "$a" ] && { loop "${A%/}/.*";}; loop "${A%/}/*"
+            }
+              [ ! $i -eq 1 ] && { printf '\n\n'; }
+          :;}
         } || {
-          [ "$#" -gt 1 ] && { printf '%s:\n' "$A"; loop "${A%/}/*"; } || {
-            loop "${A%/}/*"
-          }
-            [ ! $i -eq 1 ] && { echo; }
-        :;}
-      } || { echo "${0##*/}: cannot access '$1': No such file or directory"; exit 1; }
-    : $((i-=1))
-    done
-  ;;
-esac
+          echo "${0##*/}: cannot access '$A': No such file or directory"; exit 1
+        }
+      : $((i-=1))
+      done; echo
+    ;;
+  esac
+}
+all=$(set -- "${@}"; i="$#"; while [ "$i" -gt 0 ]; do 
+  eval "A=\${$i}"
+  case "$A" in
+    *-*)
+      [ -e "$A" ] && {
+        [ ! $i -eq 1 ] && { A="$A "; }
+        printf '%s' "$A"; :
+      }
+    ;;
+    *)
+      [ ! $i -eq 1 ] && { A="$A "; }
+      printf '%s' "$A"
+    ;;
+  esac
+  : $((i-=1))
+  done
+) # if an arg is given and $A is not a file/folder set $all to $@ with arg removed removed
+unset i; for i in $*; do [ "$i" = "-a" -a ! -e "$i" ] && { a="1"; }; done # if -a is given and is not a file desciptor set $a to enable -a handling
+unset A i; acase ${all}
