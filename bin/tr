@@ -18,8 +18,9 @@ operand(){
 
 [ ! "$1" -o ! "$2" ] && { operand "$@" ;}
 ## setup replacement
-  IFS="" r="$(printf \"${1}\")" # using this allows matching escapes
-  # r becomes <NEWLINE> here
+  IFS="" r="$(printf "${1}")" # using this allows matching escapes
+  [ ! "$r" -a "$1" = "\n" ] && { r='
+';}
 ##
 while read -r in || [ -n "$in" ]; do
   while [ -n "$in" ]; do
