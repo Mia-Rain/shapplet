@@ -8,11 +8,8 @@ operand(){
   }
   echo; exit 1
 } # handle missing args
-in=$(while IFS=""; read -r p || [ -n "$p" ]; do
-  printf '%s\n' "$p"
-done <&0)
 
-# IFS=""
+# IFS="<>"
 # set -- "$in"
 # for i in $*; do # $* is intended
 #   [ ! "$out" ] && { out="$i";:;} || { out="$out$d$i";}
@@ -20,17 +17,23 @@ done <&0)
 ## this system is REQUIRED for escape replacement, but is unstable
 
 [ ! "$1" -o ! "$2" ] && { operand "$@" ;}
-while [ -n "$in" ]; do
+## setup replacement
+  IFS="" r="$(printf \"${1}\")" # using this allows matching escapes
+  # r becomes <NEWLINE> here
+##
+while read -r in || [ -n "$in" ]; do
+  while [ -n "$in" ]; do
     next=${in#?}
     case "${in%$next}" in
-      "${1}")
+      "${r}")
         printf '%s' "${2}"
       ;;
       *)
         printf '%s' "${in%$next}"
     esac
     in="$next"
-done
+  done
+done <&0
 # this always works but cannot match escapes
 
 printf '%s\n' "$out"
