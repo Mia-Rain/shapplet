@@ -1,5 +1,4 @@
 #!/bin/sh
-# shellcheck disable=SC2015,SC2059,SC2048
 IFS=""
 operand(){
   printf '%s: missing operand' "${0##*/}"
@@ -7,34 +6,36 @@ operand(){
     printf 'Two strings must be given when translating.'
   }
   echo; exit 1
-} # handle missing args
+} # simulate coreutils tr
 
-# IFS="<>"
-# set -- "$in"
-# for i in $*; do # $* is intended
-#   [ ! "$out" ] && { out="$i";:;} || { out="$out$d$i";}
-# done
-## this system is REQUIRED for escape replacement, but is unstable
+[ ! "$1" -o ! "$2" ] && { operand "$@" ;} 
+# this will be removed in the future for -d
 
-[ ! "$1" -o ! "$2" ] && { operand "$@" ;}
-## setup replacement
-  IFS="" r="$(printf "${1}")" # using this allows matching escapes
-  [ ! "$r" -a "$1" = "\n" ] && { r='
-';}
 ##
-while read -r in || [ -n "$in" ]; do
-  while [ -n "$in" ]; do
-    next=${in#?}
-    case "${in%$next}" in
-      "${r}")
-        printf '%s' "${2}"
-      ;;
-      *)
-        printf '%s' "${in%$next}"
-    esac
-    in="$next"
-  done
-done <&0
-# this always works but cannot match escapes
+new_line="
+"
+[ "$1" = '\n' ] && r1=$new_line || r1=$(printf "${1}")
+[ "$2" = '\n' ] && r2=$new_line || r2=$(printf "${2}")
+is_newline=1
+if [ "$1" = '\n' ]; then
+	while read -r line || { is_newline=0 ; [ -n "$line" ];}; do
+		printf '%s' "$line"
+  		[ $is_newline -eq 1 ] &&  printf '%s' "$r2"
+	done <&0
+fi
+## \n handling
 
-printf '%s\n' "$out"
+while read -r line || { is_newline=0 ; [ -n "$line" ];}; do
+  while [ -n "$line" ]; do
+    next=${line#?}
+	char=$(printf '%.1s' "$line")
+    case $char in
+      "${r1}") printf '%s' "$r2" ;;
+      *) printf '%s' "$char" ;;
+    esac
+    line=$next
+  done
+  [ $is_newline -eq 1 ] && printf '\n'
+done <&0
+
+# some the above is from pystartdust! thanks a ton! ^^
