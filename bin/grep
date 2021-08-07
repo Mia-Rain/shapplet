@@ -1,26 +1,31 @@
 #!/bin/sh
 # shellcheck disable=SC2015,SC2166
-LANG=C # incase someone tries to use grep on a binary
-
+LANG=C; IFS="" # incase someone tries to use grep on a binary
 rcase() {
-  while read -r p || [ -n "$p" ] ; do
+  n=0; while read -r p || [ -n "$p" ] ; do
     case "$p" in
       *"${1}"*)
+        : $((n+=1))
         [ "$2" != "-q" ] && { IFS=""; printf "%s\\n" "$p"; } || { exit 0; }
-      ;;
-    esac    
-  done <&0
-  exit 1
+    esac
+  done <&0 >&1
+  [ ! "$n" -gt 0 ] && exit 1
 }
-case "$#" in
-  3)
-    [ -e "$2" -a "$3" = "-q" ] && { rcase "$1" "-q" < "$2"; } || {
-      exit 1
+n=1; for i in "$@"; do
+  [ -e "$i" ] && e=$(eval "printf '%s' \$$n")
+  case "$i" in
+    *-*)
+    [ "$i" != "$e" -a "$i" != "-q" ] || {
+      q="-q"
+    :;}
+  esac
+  [ "$n" -eq "$#" ] && {
+    [ "$i" != "$e" -a "$i" != "-q" ] && {
+      s=$(eval "printf '%s' \$$n")
     }
-  ;;
-  *)
-    [ -e "$2" ] && { rcase "$1" < "$2"; } || {
-      rcase "${1:?grep requires an argument}" "${2:+-q}" || exit 1
-    }
-  ;;
-esac
+  }
+  : $((n+=1))
+done
+# catch arg's regardless of placement :3 real grep doesn't do that
+[ "$e" ] && { rcase "$s" "$q" <$e; exit 0; } 
+rcase "$s" "$q" <&0
