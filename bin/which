@@ -1,0 +1,11 @@
+#!/bin/sh
+IFS=":"; for i in ${PATH}; do
+  [ -f "$i/$1" ] && l="$l:$i/$1"
+done
+l="${l#:}"
+case "$2" in
+  -a|--all) IFS=":"; for i in ${l}; do
+    printf '%s\n' "$i"
+  done ;;
+  ""|*) IFS=""; printf '%s\n' "${l%%:*}"
+esac
