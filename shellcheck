@@ -1,0 +1,4 @@
+# following are reasons for shellcheck warnings
+SC2166: -o and -a are defined in posix
+SC2015: I know what I'm doing + I use :;} ||
+SC2048: intended

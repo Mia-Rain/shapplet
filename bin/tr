@@ -14,8 +14,8 @@ operand(){
 ##
 new_line="
 "
-[ "$1" = '\n' ] && r1=$new_line || r1=$(printf "${1}")
-[ "$2" = '\n' ] && r2=$new_line || r2=$(printf "${2}")
+[ "$1" = '\n' ] && r1=$new_line || r1=$(printf '%s' "${1}")
+[ "$2" = '\n' ] && r2=$new_line || r2=$(printf '%s' "${2}")
 is_newline=1
 if [ "$1" = '\n' ]; then
 	while read -r line || { is_newline=0 ; [ -n "$line" ];}; do

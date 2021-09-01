@@ -1,12 +1,11 @@
 #!/bin/sh
-# shellcheck disable=SC2015,SC2166
 LANG=C; IFS="" # incase someone tries to use grep on a binary
 rcase() {
   n=0; while read -r p || [ -n "$p" ] ; do
     case "$p" in
       *"${1}"*)
         : $((n+=1))
-        [ "$2" != "-q" ] && { IFS=""; printf "%s\\n" "$p"; } || { exit 0; }
+        [ "$2" != "-q" ] && { IFS=""; printf "%s\\n" "$p"; :;} || { exit 0; }
     esac
   done <&0 >&1
   [ ! "$n" -gt 0 ] && exit 1
@@ -27,5 +26,5 @@ n=1; for i in "$@"; do
   : $((n+=1))
 done
 # catch arg's regardless of placement :3 real grep doesn't do that
-[ "$e" ] && { rcase "$s" "$q" <$e; exit 0; } 
+[ "$e" ] && { rcase "$s" "$q" <"$e"; exit 0; } 
 rcase "$s" "$q" <&0
