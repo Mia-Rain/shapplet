@@ -11,5 +11,10 @@
   - seq: same as coreutils
   - tr: same as coreutils
 ----------------------------
+# daily use / first in $PATH
+  - setting shapplet/bin to the first in $PATH should cause no issues
+  - EXCEPT when using ls; ls lacks options such as -l and does NOT operate identically to coreutils
+  - I strongly advise users to NOT add ls as first in $PATH
+----------------------------
 # shellcheck should show no issues; `&&` and `||` are used over if for smaller code base
 -----------------------------
